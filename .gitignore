@@ -1,4 +1,5 @@
-projects/
+Assets/
+MailImage/
 node_modules/
 .env
 package-lock.json

@@ -1,34 +1,62 @@
-const nodeMailer = require('nodemailer')
-const {mailList}= require('../../Model/user')
+const nodeMailer = require('nodemailer');
+const { mailList } = require('../../Model/user');
+const { subscribeSchema, mailSchema } = require('../../Schema/usersSchema')
 
 var transpoter = nodeMailer.createTransport({
     service: 'Gmail',
     auth: {
         user: 'ravishnu60@gmail.com',
         pass: 'twadgolbsqljoazy'
-    }
+    },
+    secure:true
 });
 
-var mailOptions = {
-    from: 'ravishnu60@gmail.com',
-    to: 'ravishnu410@gmail.com',
-    subject: 'Checking',
-    text: 'Hello HI',
-    attachments: [{
-        filename: 'test.jpg',
-        path: 'D:/Node/POC/projects/4/images/test.jpg', 
-        cid: 'img1'
-    }],
-    html: 'Embedded image: <img src="cid:img1"/>',
+const mailOptions = (data, files) => {
+    var mailBody = {
+        from: 'Node ravishnu60@gmail.com',
+        to: data.mail_id,
+        subject: data.subject,
+        text: data.text
+    }
+    var html='';
+    var attachments = [];
+
+    if (files != 0) {
+        const dataFile = files.files.images;
+
+        var i = 0;
+        for (const file of dataFile) {
+            file.mv(`MailImage/${file.name}`);
+            let temp = { filename: file.name, path: `D:/Node/POC/MailImage/${file.name}`, cid: `ci${i}` }
+            attachments.push(temp);
+            html.concat(`<img src="cid:ci${i}" style="height:150px;width:150px" /> `);
+            i++;
+        }
+        mailBody.html=html;
+        mailBody.attachments=attachments;
+    }
+    return mailBody
+
 };
 
 const sendMail = (req, res) => {
-    mailOptions.to=req.body.email;
 
-    transpoter.sendMail(mailOptions, (err, info) => {
+    const { error, value } = mailSchema.validate(req.body);
+    if (error) {
+        return res.send(error.details[0].message);
+    }
+
+    var mailData;
+    if (req.files) {
+        mailData = mailOptions(value, req);
+    } else {
+        mailData = mailOptions(value, 0);
+    }
+
+    transpoter.sendMail(mailData, (err, info) => {
         if (err) {
             console.log(err);
-            res.send("Can't Send Email.")
+            res.status(500).send("Can't Send Email")
         } else {
             console.log('Email sent: ' + info.response);
             res.send("Mail sent")
@@ -36,15 +64,51 @@ const sendMail = (req, res) => {
     })
 }
 
-const subscribe= (req,res)=>{
-   res.send(req.body);
+const subscribe = async (req, res) => {
+    //validation
+    const { error, value } = subscribeSchema.validate(req.body);
+
+    if (error) {
+        return res.status(400).send(error.details[0].message)
+    }
+
+    const check = await mailList.findOne({ where: { mail_id: value.mail_id } });
+
+    if (check) {
+        return res.send("Already subscribed");
+    } else {
+        const { err, data } = await mailList.create(value);
+        if (err) throw err;
+        return res.send("Subscribed successfully");
+    }
+
+
 }
 
-const unsubscribe= (req,res)=>{
-    res.send(req.params);
+const unsubscribe = async (req, res) => {
+    //validation
+    const { error, value } = subscribeSchema.validate(req.body);
+
+    if (error) {
+        return res.status(400).send(error.details[0].message)
+    }
+
+    const check = await mailList.findOne({ where: { mail_id: value.mail_id } });
+
+    if (check) {
+        mailList.destroy({ where: { mail_id: value.mail_id } })
+        return res.send("Unsubscribed successfully");
+    } else {
+        res.send("You are not subscribed");
+    }
 }
 
-const viewsubscriber= (req,res)=>{
-    res.send("ok");
+const viewsubscriber = async (req, res) => {
+    const data = await mailList.findAll({ attributes: ['mail_id'], order: [['id', 'desc']], })
+    if (data) {
+        return res.send(data)
+    } else {
+        return res.status(404).send("Data not found")
+    }
 }
-module.exports= {sendMail,subscribe,unsubscribe,viewsubscriber}
+module.exports = { sendMail, subscribe, unsubscribe, viewsubscriber }

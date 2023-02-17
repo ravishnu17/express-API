@@ -17,7 +17,17 @@ const projectImages= sequelize.define('tbl_project_images',{
     image_location:{type:Sequelize.STRING,allowNull:false},
 })
 
-project.hasOne(projectImages,{onDelete:'CASCADE',foreignKey:'project_id'});
+const projectDocs= sequelize.define('tbl_project_docs',{
+    project_id:{type:Sequelize.INTEGER,allowNull:false},
+    file_name:{type:Sequelize.STRING,allowNull:false},
+    location:{type:Sequelize.STRING,allowNull:false},
+})
+
+project.hasMany(projectImages,{onDelete:'CASCADE',foreignKey:'project_id',as:'images'});
 projectImages.belongsTo(project,{foreignKey:'project_id'});
 
-module.exports= {project,projectImages,sequelize,Sequelize}
+project.hasMany(projectDocs,{onDelete:'CASCADE',foreignKey:'project_id',as:'docs'});
+projectDocs.belongsTo(project,{foreignKey:'project_id'});
+
+
+module.exports= {project,projectImages,projectDocs,sequelize,Sequelize}

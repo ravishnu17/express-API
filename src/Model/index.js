@@ -1,7 +1,7 @@
 const Sequelize= require('sequelize');
 
 const db_url= process.env.db_url;
-const sequelize=new Sequelize(db_url,{logging:false});
+const sequelize=new Sequelize(db_url,{logging:false}); 
 
 try{
     sequelize.authenticate();
