@@ -6,7 +6,7 @@ const user=sequelize.define('tbl_users',{
     mobile_no:{type:Sequelize.BIGINT,allowNull:false},
     email_id:{type:Sequelize.STRING,allowNull:false},
     password:{type:Sequelize.STRING,allowNull:false},
-    status:{type:Sequelize.BOOLEAN,allowNull:false,defaultValue:true},
+    status:{type:Sequelize.BOOLEAN,allowNull:false,defaultValue:false},
 });
 
 const mailList=sequelize.define('tbl_mailList',{

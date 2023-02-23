@@ -144,11 +144,11 @@ const addProjects = async (req, res) => {
 }
 
 const updateProjects = async (req, res) => {
-    const { error, value } = projectSchema.validate(req.body);
-    if (error) {
-        return res.send(error.details);
-    }
-
+    // const { error, value } = projectSchema.validate(req.body);
+    // if (error) {
+    //     return res.send(error.details);
+    // }
+    const value= req.body;
     const project_id = req.params.id;
     const checkData = await project.findByPk(project_id);
     if (checkData) {
@@ -218,7 +218,10 @@ const searchProject = async (req, res) => {
     const searchValue = req.params.value
     var options = {
         where: {
-            project_name: { [Op.iLike]: `${searchValue}%` }
+            [Op.or]:[
+                {project_name: { [Op.iLike]: `${searchValue}%` }},
+                {project_description: { [Op.iLike]: `${searchValue}%` }}
+            ]
         }, raw: true
     };
     const value = await project.findAll(options);

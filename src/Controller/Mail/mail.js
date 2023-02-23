@@ -1,6 +1,7 @@
 const nodeMailer = require('nodemailer');
 const { mailList } = require('../../Model/user');
-const { subscribeSchema, mailSchema } = require('../../Schema/usersSchema')
+const { subscribeSchema, mailSchema } = require('../../Schema/usersSchema');
+const fs = require('fs');
 
 var transpoter = nodeMailer.createTransport({
     service: 'Gmail',
@@ -8,7 +9,7 @@ var transpoter = nodeMailer.createTransport({
         user: 'ravishnu60@gmail.com',
         pass: 'twadgolbsqljoazy'
     },
-    secure:true
+    secure: true
 });
 
 const mailOptions = (data, files) => {
@@ -18,22 +19,24 @@ const mailOptions = (data, files) => {
         subject: data.subject,
         text: data.text
     }
-    var html='';
-    var attachments = [];
 
     if (files != 0) {
-        const dataFile = files.files.images;
+        
+        var html = `<h3>${data.text}</h3>`;
+        var attachments = [];
 
+        files.files.images.length==undefined && (files.files.images=[{...files.files.images}])
+        const dataFile = files.files.images;
         var i = 0;
         for (const file of dataFile) {
             file.mv(`MailImage/${file.name}`);
             let temp = { filename: file.name, path: `D:/Node/POC/MailImage/${file.name}`, cid: `ci${i}` }
             attachments.push(temp);
-            html.concat(`<img src="cid:ci${i}" style="height:150px;width:150px" /> `);
+            html= html.concat(`<img src="cid:ci${i}" style="height:150px;width:150px" /> `);
             i++;
         }
-        mailBody.html=html;
-        mailBody.attachments=attachments;
+        mailBody.html=html
+        mailBody.attachments = attachments;
     }
     return mailBody
 
@@ -59,7 +62,8 @@ const sendMail = (req, res) => {
             res.status(500).send("Can't Send Email")
         } else {
             console.log('Email sent: ' + info.response);
-            res.send("Mail sent")
+            res.send("Mail sent");
+            fs.rmSync('mailImage', { recursive: true, force: true })
         }
     })
 }

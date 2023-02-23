@@ -3,8 +3,8 @@ require('dotenv').config();
 const cors=require('cors');
 const morgan= require('morgan');
 const fileUpload= require('express-fileupload');
-const db= require('./src/Model/audition');
-const {projectRoutes,userRoutes, auditionRouts}= require('./src/Controller/routes');
+const db= require('./src/Model/events');
+const Routes= require('./src/Controller/routes');
 
 //create db tables
 db.sequelize.sync({alter:true});
@@ -20,9 +20,10 @@ app.use(fileUpload({createParentPath:true}));
 app.use("/Assets",express.static("Assets"))
 
 //Routes
-app.use('/projects',projectRoutes);
-app.use('/users',userRoutes);
-app.use('/audition',auditionRouts);
+app.use('/projects',Routes.projectRoutes);
+app.use('/users',Routes.userRoutes);
+app.use('/audition',Routes.auditionRouts);
+app.use('/events',Routes.eventRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Works well');

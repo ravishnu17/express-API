@@ -23,4 +23,9 @@ const loginSchema=Joi.object({
     password:Joi.string().required()
 });
 
-module.exports= {subscribeSchema,mailSchema, userSchema,loginSchema}
+const passwordSchema=Joi.object({
+    old_password:Joi.string().required(),
+    new_password:Joi.string().required()
+});
+
+module.exports= {subscribeSchema,mailSchema, userSchema,loginSchema, passwordSchema}
