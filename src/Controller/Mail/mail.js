@@ -29,8 +29,7 @@ const mailOptions = (data, files) => {
         const dataFile = files.files.images;
         var i = 0;
         for (const file of dataFile) {
-            file.mv(`MailImage/${file.name}`);
-            let temp = { filename: file.name, path: `D:/Node/POC/MailImage/${file.name}`, cid: `ci${i}` }
+            let temp = { filename: file.name, content:file.data, cid: `ci${i}` }
             attachments.push(temp);
             html= html.concat(`<img src="cid:ci${i}" style="height:150px;width:150px" /> `);
             i++;
@@ -63,7 +62,6 @@ const sendMail = (req, res) => {
         } else {
             console.log('Email sent: ' + info.response);
             res.send("Mail sent");
-            fs.rmSync('mailImage', { recursive: true, force: true })
         }
     })
 }
